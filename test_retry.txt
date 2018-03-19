@@ -1,0 +1,27 @@
+final AtomicLong counter = new AtomicLong();
+        Flowable.fromPublisher(subscriber ->
+        {
+            subscriber.onSubscribe(new Subscription()
+            {
+                {
+                    System.out.println("onSubscribe");
+                }
+
+                private final long number = counter.incrementAndGet();
+
+                @Override
+                public void request(final long l)
+                {
+                    subscriber.onNext(number);
+                    subscriber.onError(new Exception("Fail #" + number));
+                }
+
+                @Override
+                public void cancel()
+                {
+
+                }
+            });
+        })
+        .retry(3)
+        .blockingSubscribe(System.out::println, throwable -> throwable.printStackTrace(System.out));
